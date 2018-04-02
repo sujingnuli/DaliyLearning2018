@@ -1,0 +1,440 @@
+//用drawTexture画图。
+laya.display.graphics .
+drawTexture 。需要先加载，然后在绘图。必须先加载。
+加载要用到指针，指针 要用laya.display.Handler ,Handler.create 可以从对象池创建，减少对象创建的消耗。
+
+public class Main{
+private var monkey2:String="../../res/monkey2.jpg";
+	public function Main(){
+		Laya.init(600,300);
+		Laya.stage.bgColor='$ffffff';
+
+		Laya.loader.load(monkey2,Handler.create(this,graphicsImg));
+
+	}
+	private function graphicsImg():void{
+		var img:Sprite=new Sprite();
+		img.grahpics.drawTexture(Laya.loader.getRes(monkey2),100,50);
+		Laya.stage.addChild(img);
+	}
+}
+//drawTexture 显示图片，1.先加载 2.加载之后绘图 3.加载到舞台
+public class Main{
+	private var monkey2:String="../../res/monkey2.jpg";
+	public function Main(){
+		Laya.init(600,300);
+		Laya.stage.bgColor='$ffffff';
+		Laya.loader.load(monkey2,Handler.create(this,graphicsImg));
+	}
+	private function graphicsImg():void{
+		var img:Sprite=new Sprite();
+		img.grahpics.drawTexture(Laya.loader.getRes(monkey2),100,50);
+		Laya.stage.addChlid(img);
+	}
+}
+
+Laya.loader.load(monkey2,Handler.create(this,graphicsImg));
+Laya.loader.getRes(monkey2);
+
+public class Main{
+	private var monkey2:String="../../res/monkey2.jpg";
+	public function Main(){
+		Laya.init(600,300);
+		Laya.stage.bgColor="#ffffff";
+		Laya.loader.load(monkey2,Handler.create(this,graphicsImg));
+	}
+	private function graphicsImg():void{
+		var img:Sprite=new Sprite();
+		img.graphics.drawTexture(Laya.loader.getRes(monkey2),0,0);
+		Laya.stage.addChild(img);
+	}
+}
+//用drawTexture 切换图片
+//用loadImg 切换图片
+
+public class Main{
+	private var monkey1:String="../../res/monkey1.jpg";
+	prviate var monkey2:String="../../res/monkey2.jpg";
+	private var flag:Boolean=false;
+	private var img:Sprite;
+	public function Main(){
+		Laya.init(600,300);
+		Laya.stage.bgColor="#ffffff";
+
+		img=new Sprite();
+		switchImg();
+		img.on("click",this,switchImg);
+		Laya.stage.addChild(img);
+	}
+	private function switchImg(e:*=null):void{
+		img.grahpics.clear();
+		var imgUrl=(flag=!flag)?monkey1:monkey2;
+		img.loadImage(imgUrl,0,0);
+	}
+}
+//用drawTexture 绘图。
+
+public class Main{
+	private var monkey1:String="../../res/monkey1.jpg";
+	private var moneky2:String="../../res/monkey2.jpg";
+	private var flag:Boolean=false;
+	private var img:Sprite;
+	private var imgUrl:String;
+	public function Main(){
+		Laya.init(600,300);
+		Laya.stage.bgColor="#ffffff";
+
+		img=new Sprite();
+		switchImg();
+		img.on("click",this,switchImg);
+
+		Laya.stage.addChild(img);
+	}
+	private function switchImg():void{
+		img.graphics.clear();
+		imgUrl=(flag=!flag)?monkey1:monkey1;
+		Laya.loader.load(imgUrl,this,drawImg);
+	}
+	private function drawImg():void{
+		img.graphics.drawTexture(Laya.loader.getRes(imgUrl),0,0);
+		
+	}
+}
+
+
+public class Main{
+	private var monkey1:String="../../res/monkey1.jpg";
+	private var moneky2:String="../../res/monkey2.jpg";
+	private var img:Sprite;
+	private var flag:Boolean=false;
+	public function Main(){
+		Laya.init(600,300);
+		Laya.stage.bgColor='#ffffff';
+		Laya.loader.load([monkey1,monkey2],Handler.create(this,graphicsImg));
+	}
+	private function graphicsImg(e:*=null):void{
+		img=new Spirte();
+		Laya.stage.addChild(img);
+
+		switchImg();
+		img.on("click",this,switchImg)
+		img.pos(100,50);
+	}
+	private function switchImg():void{
+		img.graphics.clear();
+		var imgUrl:Stirng=(flag=!flag)?monkey1:monkey2;
+		
+		var texture:Texture=Laya.loader.getRes(imgUrl);
+		//绘制纹理
+		img.graphics.drawTexture(texture);
+
+		img.size(texture.Width,texture.height);
+	}
+}
+
+//Laya.display.Sprite
+	//graphics
+		clear();
+		drawTexture(Laya.loader.getRes(imgUrl));
+	//on("click",this,switchImg);
+
+	//pos(50,50)
+
+	//size(100,40)
+
+//package
+{
+	//Handler 是事件处理类，推荐使用Handler.create() 从对象池创建。减少对象创建消耗。
+	//创建的对象不再使用后，也可以用Handler.recover() 回收到对象池。回收后不可再使用，否则会导致不可预料的错误。
+	import laya.display.Sprite;
+	import laya.utils.Handler;
+
+	public class Main{
+		
+		private var monkey2:String="../../res/monkey2.jpg";
+		public function Main(){
+			Laya.init(600,400);
+			Laya.stage.bgColor='#ffffff';
+			//先加载图片资源，加载后 通过回调方法 来绘制图片并添加到舞台
+			Laya.loader.load(monkey2,Handler.create(this,graphicsImg));	
+			//loader类，可以用来加载文本，json,xml,二进制 图片等资源信息
+			//Laya.loader.load(url,Handler.create(this,graphicsImg));
+			//loader类，getRes .获取指定资源地址的资源。
+		}
+		private function graphicsImg():void{
+			var img:Sprite=new Sprite();
+			img.graphics.drawTexture(Laya.loader.getRes(monkey2),100,50);
+			Laya.stage.addChild(img);
+		}
+	}
+}
+
+
+public class Main{
+	private var monkey1:String="../../res/monkey1.jpg";
+	private var monkey2:String="../../res/monkey2.jpg";
+	private var img:Sprite;
+	public function Main(){
+		Laya.init(600,300);
+		Laya.stage.bgColor="#ffffff";
+		Laya.loader.load([moneky1,monkey2],Handler.create(this,graphicsImg));
+	}
+	private function graphicsImg()：void{
+		img=new Sprite();
+		Laya.stage.addChild(img);
+		switchImg();
+		img.on("click",this,switchImg);
+		img.pos(100,50);
+	}	
+	private function switchImg(e:*=null):void{
+		img.graphics.clear();
+		var imgUrl:String=(flag=!flag)?monkey1:monkey2;
+		var texture:Texture=Laya.loader.getRes(imgUrl);
+		img.graphics.drawTexture(texutre);
+		img.size(texture.width,text.height);
+	}
+
+}
+
+遮罩API 。 Laya.display.Sprite API 内。
+Laya.display.Sprite
+	//graphics
+		//clear();
+		//drawTexture(texture);
+	//pos(10,50)
+	//size(texture.width,texture.height);
+	//on("click",this,switchImg);
+	//mask
+Laya.display.Sprite.mark
+namepsace Laya.display.Sprite{
+	public class mark{
+		public functoin mark(){
+			
+		}
+	}
+}
+Laya.loader.load([monkey1,monkey2],Handler.create(this,graphicsImg));
+Laya.loader.getRes(imgUrl);
+Laya.resource.Texture:纹理相关的类。
+
+
+public class Main{
+	private var res:String;
+	public function Main(){
+		Laya.init(600,400);
+		Laya.stage.bgColor="#ffffff";
+		res="../../res/monkey1.jpg";
+		Laya.loader.load(res,Handler.create(this,graphicsImg));
+	}
+	public function graphicsImg():void{
+		var img:Sprite=new Spirte();
+		img.graphics.drawTexture(Laya.loader.getRes(res));
+		Laya.stage.addChild(img);
+
+		//创建遮罩对象
+		var cMask:Sprite=new Sprite();
+		cMask.graphics.drawCircle(80,80,50,"#ff0000");
+		cMask.pos(120,50);
+		img.mask=cMask;
+
+	}
+}
+
+//实现遮罩
+public class Main{
+	public function Main(){
+		Laya.init(600,300);
+		Laya.stage.bgColor="#ffffff";
+		laya.loader.load(monkey2,Handler.create(graphicsImg));
+	}
+	private function graphicsImg():void{
+		var img:Sprite=new Sprite();
+		img.graphics.drawTexture(Laya.loader.getRes(monkey2));
+		Laya.stage.addChild(img);
+		var mask:Sprite=new Sprite();
+		mask.graphics.drawCircle(80,80,80,"#ff0000");
+		mask.pos(120,50);
+		img.mask=mask;
+	}
+}
+
+//设置颜色滤镜。
+LayaAir 引擎，提供颜色滤镜，发光滤镜/阴影滤镜，模糊滤镜。颜色滤镜支持Canvas 和WebGL模式。模糊滤镜对性能消耗大，支持WebGl模式。
+
+ColorFilter. Laya.filters .4*5 矩阵，改变颜色通道。
+需要给一个位图，设置滤镜，先创建一个颜色矩阵，用Laya.filters.ColorFilter 来创建一个颜色滤镜的实例。
+Matrix : 矩阵。
+//GMS
+GNS.Core.Module 
+
+HttpModuleService.cs
+通过HttpModule，所有网站通过配置注入。
+
+
+HttpModule 是向 实现类 提供初始化和处置事件 。
+
+public class HttpModuleService；IHttpModule{
+	private static bool isStarted=false;
+	private static object moduleStart=new object();
+	public void Init(HttpApplication context){
+		if(!isStarted){
+			lock(olock){
+				if(!isStarted){
+					isStarted=true;
+					this.InitHandler();
+				}
+			}
+		}
+		context.BeginRequest+=context_BeginRequest;
+		context.EndRequest+=context_EndRequest;
+	}
+	private void InitHandler(){
+	
+	}
+	void context_BeginRequest(object sender,EventArgs e){
+		
+	}
+}
+//设置滤镜
+var colorMatrix:Array=[
+1,0,0,0,0,//R
+0,0,0,0,0,//G
+0,0,0,0,0,//B
+0,0,0,1,0//A
+];
+var redFilter:ColorFilter=new ColorFilter(colorMatrix);
+Sprite 的Filters属性，将颜色滤镜 叠加到位图中
+
+public class Main{
+	public function Main(){
+		Laya.init(600,300);
+		Laya.stage.bgColor='#ffffff';
+		createImage(100,50);
+		createRedFilter();
+		createGrayFilter();
+	}
+	private function createImage(w:int,h:int):Sprite{
+		var img:Sprite=new Sprite();
+		Laya.stage.addChild(img);
+		img.loadImage("../../res/monkey1.jpg",w,h);
+		return img;
+	}
+	private function createrRedFilter():void{
+		var colorMatrix:Array=[
+			1,0,0,0,0,
+			0,0,0,0,0,
+			0,0,0,0,0,
+			0,0,0,0,1
+		];
+
+
+	}
+}
+
+//设置颜色过滤器
+
+public class Main{
+	public function Main(){
+		Laya.init(600,300);
+		Laya.stage.bgColor='#ffffff';
+
+		createImage(0,50);
+		createRedFilter();
+		createGrayFilter();
+	}
+	private function createRedFilter():void{
+		var redMatrix:Array=[
+		
+		];
+		var redFilter:ColorFilter=new ColorFilter(colorMatrix);
+		var img:Sprite=createImage(150,50);
+		img.Filters=[redFilter];
+	}
+	private function createGrayFilter():void{
+		var colorMatrix:Array=[
+		
+		];
+		var grayFilter:ColorFilter=new ColorFilter(colorMatrix);
+		var img:Sprite=createImage(300,50);
+		img.Filters=[grayFilter];
+	}
+
+	private function createImage(w:int,h:int):Sprite{
+		var img:Sprite=new Sprite();
+		Laya.stage.addChild(img);
+		img.loadImage("../../res/monkey1.jpg",w,h);
+		return img;
+	}
+}
+//颜色过滤
+//发光与阴影过滤
+Laya.filters.ColorFilter.
+glow：发光，炽热
+GlowFilter 
+laya.filters.GlowFilter
+laya.filters.ColorFilter .
+WebGL下有效。
+
+import laya.webgl.WebGL;
+import laya.display.Sprite;
+public class Main{
+	
+	public function Main(){
+		Laya.init(600,300,WebGL);
+		Laya.stage.bgColor="#ffffff";
+
+		createImage(100,50);
+		createGlowFilter();
+		createShadowFilter();
+	}
+	private function createShadowFilter():void{
+		var shadowFilter:GlowFilter=new GlowFilter("#000000",8,8);
+		var img:Sprite=createImage(400,50);
+		img.filters=[shadowFilter];
+	}
+	private function createGlowFilter():void{
+		var glowFilter:GlowFilter=new GlowFilter("#ff0000",15,0,0);
+		var img:Sprite=createImage(250,50);
+		img.filters=[glowFilter];
+	}
+
+	private function createImage(w:int,h:int):Sprite{
+		var img:Sprite=new Sprite();
+		Laya.stage.addChild(img);
+		img.loadImage("../../res/head.png",w,h);
+		return img;
+	}
+}
+//laya.filters.ColorFilter
+//laya.filters.GlowFilter
+//laya.filters.BlurFilter
+drawLine
+
+public class Main{
+	public function Main(){
+		Laya.init(600,300);
+		Laya.stage.bgColor='#000000';
+		drawSomething();
+	}
+	private function drawSomething():void{
+		var line:Sprite=new Sprite();
+		line.graphics.drawLine(100,50,150,50,"#ff0000",3);
+	}
+}
+laya.display.Sprite.graphics.drawLines(); 画折线 。
+
+public class Main{
+	public function Main(){
+		Laya.init(600,300);
+		Laya.stage.bgColor="#ffffff";
+
+		drawSomething();
+	}
+	private function drawSomething():void{
+		var img:Sprite=new Sprite();
+		img.graphics.drawLines(100,50,[0,0,50,-50,100,50,150,50],"#ff0000",3);
+		Laya.stage.addChild(img);
+	}
+}
+
+贝塞尔 曲线 是应用于  二维图形 应用程序的 数学曲线。
