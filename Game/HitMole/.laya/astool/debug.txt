@@ -1,0 +1,19 @@
+1,0.00,,0,Project command:d:\GitHub\DaliyLearning2018\Game\HitMole/.actionScriptProperties;iflash=false;windowshow=false;chromerun=false;quickcompile=true
+Project configuration:d:\GitHub\DaliyLearning2018\Game\HitMole/.actionScriptProperties.
+1,0.00,,0,output path:d:/GitHub/DaliyLearning2018/Game/HitMole/bin/h5/
+1,0.00,,0,Main Class:d:/GitHub/DaliyLearning2018/Game/HitMole/src/Main.as
+1,0.00,,0,output file:Main
+1,0.00,,0,compilerSourcePath E:/soft/game/LAYA/LayaAirAS3_1.7.17_beta/as/libs/src/
+
+1,0.00,,0,Compile Path:d:/GitHub/DaliyLearning2018/Game/HitMole/src/
+
+1,0.00,,0,Compile Path:E:/soft/game/LAYA/LayaAirAS3_1.7.17_beta/as/libs/src/
+
+1,0.00,d:/GitHub/DaliyLearning2018/Game/HitMole/src,0,Collect
+1,0.00,E:/soft/game/LAYA/LayaAirAS3_1.7.17_beta/as/libs/src,0,Collect
+1,2.00,,0,read class message
+1,89.95,,0,Disable Flash3D d:/GitHub/DaliyLearning2018/Game/HitMole/src/Main.as
+12,89.95,d:/GitHub/DaliyLearning2018/Game/HitMole/bin/h5/Main.max.js,861905,
+11,89.95,d:/GitHub/DaliyLearning2018/Game/HitMole/bin/h5/Main.max.html,887,
+******************************************************************************
+14,89.95,,0,
