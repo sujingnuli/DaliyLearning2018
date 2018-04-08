@@ -7,7 +7,8 @@ package
 	import laya.net.Loader;
 	import laya.utils.Handler;
 	public class Main{
-		private var gameStart:GameStart;
+		public static var gameStart:GameStart;
+		public  static var gameView:GameView;
 		public function Main(){
 			Laya.init(800,600);
 			Laya.stage.bgColor="#ffcccc";
@@ -17,7 +18,7 @@ package
 			];
 			Laya.loader.load(resArr,Handler.create(this,this.GoStart));
 		}
-		private function GoStart(){
+		private function GoStart():void{
 			gameStart=new GameStart();
 			Laya.stage.addChild(gameStart);
 		}
