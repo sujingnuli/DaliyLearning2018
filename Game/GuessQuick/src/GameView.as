@@ -18,6 +18,7 @@ package
 		private var chosv:int=0;
 		private var chosf:Boolean=false;
 		private var crabs:Vector.<Crab>;
+		public var run:Boolean=false;
 		
 		public function GameView()
 		{
@@ -44,10 +45,11 @@ package
 				crabs.push(crab);
 			}
 			this.againBtn.on(Event.CLICK,this,this.overAgain);
-			SoundManager.playSound("sounds/bgm.mp3",0);
 		}
 		private function overAgain():void{
-			this.EmptyAll();
+			if(!run){
+				this.EmptyAll();
+			}
 		}
 		private function EmptyAll():void{
 			this.len=660;
@@ -79,11 +81,15 @@ package
 		// 	this.againBtn.on(Event.CLICK,this,this.overAgain);
 		// }
 		public function MoveOn(num:int):void{
-			var name:String=GetName(num);
-			this.chos.text=name;
-			this.chosv=num;
-			for(var i:int=0;i<4;i++){
-				crabs[i].Move();
+			if(!run){
+				run=true;
+				this.againBtn.visible=false;
+				var name:String=GetName(num);
+				this.chos.text=name;
+				this.chosv=num;
+				for(var i:int=0;i<4;i++){
+					crabs[i].Move();
+				}
 			}
 
 		}
@@ -110,6 +116,8 @@ package
 				for(var i:int=0;i<4;i++){
 					crabs[i].Stop();
 				}
+				run=false;
+				this.againBtn.visible=true;
 			}
 		}
 		// private function overAgain():void{

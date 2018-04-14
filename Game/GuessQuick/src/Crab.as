@@ -19,7 +19,7 @@ package
 		private var stopHandler:Handler;
 		private var dis:int;
 		private var index:int;
-		private var letter:Image=new Image();;
+		private var letter:Image=new Image();
 		public function Crab(box:animalMoveUI,index:int,dis:int,len:int,color:String,moves:Handler,stops:Handler){
 			this.box=box;
 			this.len=len;
@@ -37,7 +37,9 @@ package
 
 		}
 		public function Clicked():void{
-			this.moveHandler.runWith(this.index);
+			if(!Main.gameView.run){
+				this.moveHandler.runWith(this.index);
+			}
 		}
 		public function Move():void{
 			this.box.move.play();
@@ -67,7 +69,6 @@ package
 				this.box.word.visible=true;
 				Tween.to(this.box.word,{y:this.box.word.y-40},300,Ease.backIn);
 			}
-			
 		}
 		public function EmptyInit():void{
 			this.box.x=122;

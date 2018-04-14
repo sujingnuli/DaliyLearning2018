@@ -1,1 +1,1 @@
-{"net":{"http_server_properties":{"broken_alternative_services":[{"broken_count":1,"host":"beacons.gcp.gvt2.com","port":443,"protocol_str":"quic"}],"servers":[{"https://beacons.gcp.gvt2.com":{"supports_spdy":true}}],"version":5}}}
+{"net":{"http_server_properties":{"servers":[{"https://beacons.gcp.gvt2.com":{"alternative_service":[{"advertised_versions":[39],"expiration":"13170334640483123","port":443,"protocol_str":"quic"}],"network_stats":{"srtt":53970},"supports_spdy":true}}],"supports_quic":{"address":"192.168.11.237","used_quic":true},"version":5}}}

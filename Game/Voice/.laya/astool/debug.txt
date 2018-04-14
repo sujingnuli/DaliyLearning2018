@@ -1,0 +1,19 @@
+1,0.00,,0,Project command:d:\GitHub\DayLearning2018\DaliyLearning2018\Game\Voice/.actionScriptProperties;iflash=false;windowshow=false;chromerun=false;quickcompile=true
+Project configuration:d:\GitHub\DayLearning2018\DaliyLearning2018\Game\Voice/.actionScriptProperties.
+1,0.00,,0,output path:d:/GitHub/DayLearning2018/DaliyLearning2018/Game/Voice/bin/h5/
+1,0.00,,0,Main Class:d:/GitHub/DayLearning2018/DaliyLearning2018/Game/Voice/src/Main.as
+1,0.00,,0,output file:Main
+1,0.00,,0,compilerSourcePath E:/soft/game/LAYA/LayaAirAS3_1.7.17_beta/as/libs/src/
+
+1,0.00,,0,Compile Path:d:/GitHub/DayLearning2018/DaliyLearning2018/Game/Voice/src/
+
+1,0.00,,0,Compile Path:E:/soft/game/LAYA/LayaAirAS3_1.7.17_beta/as/libs/src/
+
+1,0.00,d:/GitHub/DayLearning2018/DaliyLearning2018/Game/Voice/src,0,Collect
+1,0.00,E:/soft/game/LAYA/LayaAirAS3_1.7.17_beta/as/libs/src,0,Collect
+1,2.00,,0,read class message
+1,89.89,,0,Disable Flash3D d:/GitHub/DayLearning2018/DaliyLearning2018/Game/Voice/src/Main.as
+12,89.89,d:/GitHub/DayLearning2018/DaliyLearning2018/Game/Voice/bin/h5/Main.max.js,2588574,
+11,89.89,d:/GitHub/DayLearning2018/DaliyLearning2018/Game/Voice/bin/h5/Main.max.html,887,
+******************************************************************************
+14,89.89,,0,
