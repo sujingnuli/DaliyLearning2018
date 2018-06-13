@@ -1,0 +1,693 @@
+用户可以添加了。
+看怎么添加的，
+步骤是什么
+
+public class UserController:ComController
+{
+	public ActionResult Create(){
+		var roles=this.AccountService.GetRoleList();
+		ViewBag.RoleIds=new SelectList(roles,"ID","Name");
+		var model=new User();
+		user.Password="111111";
+		return View("Edit",model);
+	}
+
+	[HttpPost]
+	public ActionResult Create(FormCollection collection){
+		var model=new User();
+		this.TryUpdateModel<User>(model);
+		try{
+			this.AccountService.SaveUser(model);
+		}catch(BusinessException e){
+			this.ModelState.AddModelError(e.Name,e.Message);
+			var roles=this.AccountService.GetRoleList();
+			this.ViewBag.RoleIds=new SelectList(roles,"ID","Name");
+			return View("Edit",model);
+		}
+		this.RefreshParent();
+	}
+}
+
+public class FrameController
+{
+	public ContentResult RefreshParent(string alert=null){
+		var script=string.Format("<script>{0}parent.location.reload(1);</script>",string.IsNullOrEmpty(alert)?string.Empty:"alert('"+alert+"');");
+		return Content(script);
+	}
+}
+public interface IUserService
+{
+	IEnumerable<User> GetUserList(UserRequest request=null);
+	IEnumerable<Role> GetRoleList(RoleRequest request=null);
+	void SaveUser(User user);
+}
+public class UserService:IUserService
+{
+	public void SaveUser(User user){
+		using(var dbContext=new UserDbContext()){
+			if(user.ID>0){
+			
+			}else{
+				var existUser=dbContext.FindAll<User>(u=>u.LoginName==user.LoginName);
+				if(existUser.Count>0){
+					throw new BusinessException("LoginName","该名称已经存在！");
+				}else{
+					//就保存数据
+					dbContext.Insert<User>(user);
+					var roles=dbContext.Roles.Where(r=>user.RoleIds.Contains(r.Id)).ToList();
+					user.Roles=roles;
+					this.SaveChanges():
+				}
+			}
+		}
+	}
+
+	public IEnumerable<User> GetUserList(UserRequest request==null){
+		request=request??new UserRequest();
+		using(var dbContext=new AccountDbContext()){
+			var users=dbContext.Users.Include("Roles");
+			if(!string.IsNullOrEmpty(request.LoginName)){
+				users=users.where(u=>u.LoginName.Contains(request.LoginName));
+			}
+			if(!string.IsNullOrEmpty(request.Mobile)){
+				users=users.where(u=>u.Mobile.Contains(request.Mobile));
+			}
+			return users.OrderByDescending(u=>u.Id).ToPagedList();
+		}
+	}
+	public IEnumerable<Role> GetRoleList(RoleRequest request==null){
+		request=request??new RoleRequest();
+		using(var dbContext=new AccountDbContext()){
+			var roles=dbContext.GetRoleList();
+			if(!string.IsNullOrEmpty(request.RoleName)){
+				roles=roles.Where(r=>r.Name.Contains(request.RoleName));
+			}
+			return roles.OrderByDescending(u=>u.ID).ToPagedList(request.PageIndex,request.PageSize);
+		}
+	}
+	public void SaveUser(User user){
+		using(var dbContext=new AccountDbContext()){
+			if(user.ID>0){
+			
+			}else{
+				//插入
+				var existUser=dbContext.FindAll<User>(u=>users.LoginName==u.LoginName).ToList();
+				if(existUser.Count>0){
+					throw new BusinessException("LoginName","此名称已经被占用了");
+				}else{
+					dbCotnext.Insert<User>(user);
+					var roles=dbContext.Roles.Where(r=>user.RoleIds.Contains(r.Id)).ToList();
+					user.Roles=roles;
+					dbContext.SaveChanges();
+				}
+			}
+		}
+		return RefreshParent();
+	}
+}
+public class AccountDbContext:DbContextBase
+{
+	public AccountDbContext():base(CachedConfigContext.Current.DaoConfig.Account,new LogDbContext()){
+		
+	}
+	public void OnModelCreating(DbModelBuilder modelBuilder){
+		this.Database.SetInitializer<AccountDbContext>(null);
+		modelBuilder.Entity<User>().Ignore(p=>p.NewPassword);
+		modelBulder.Entity<User>().
+			HasMany(u=>u.Role)
+			.WithMany(r=>r.User)
+			.Map(m=>{
+				m.ToTable("UserRole");
+				m.MapLeftKey("UserID");
+				m.MapRightKey("RoleID");
+			});
+		base.OnModelCreating(modelBulder);
+
+
+	}
+	public DbSet<User> Users;
+	public DbSet<Role> Roles;
+	public DbSet<VerifyCode> VerifyCodes;
+	public DbSet<LoginInfo> LoginInfos;
+}
+public interface IAuditable
+{
+	void WriteLog(int modelId,string userName,string moduleName,string tableName,string EventType,ModelBase newValue);
+}
+//GMS.Framework.Contract
+昨天是添加日记的时候，出错了，日记的createTime 没有标注。
+//GMS.Framework.Log
+public class AuditLog:ModelBase
+{
+	public int ModelId{get;set;}
+	public string UserName{get;set;}
+	public string ModuleName{get;set;}
+	public string TableName{get;set;}
+	public string EventType{get;set;}
+	public ModelBase NewValue{get;set;}
+}
+public class LogDbContext:DbContextBase,IAuditable
+{
+	public LogDbContext():base(CachedConfigContext.Current.DaoConfig.Log){
+		this.Database.SetInitalizer<LogDbContext>(null);
+	}
+	public DbSet<AuditLog> AuditLogs{get;set;}
+
+	public void WriteLog(int modelId,string userName,string moduleName,string tableName,string eventType,ModelBase newValue){
+		this.AuditLogs.Add(new{
+			modelId=modelId,
+			userName=userName,
+			moduleName=moduleName,
+			tableName=tableName,
+			eventType=eventType,
+			newValue=JsonConvert.SerializerObject(newValue,new JsonSerializerSettings(){ReferenceLoopHanding=ReferenceLoopHanding.Ignore});
+		});
+		this.SaveChanges();
+		this.Dispose();
+	}
+}
+public class DbContextBase:DbContext,IDispose
+{
+	public IAuditable AuditLogger{get;set;}
+	public DbContextBase(string connectionString){
+		this.Database.Connection.ConenctionString=connectionString;
+		this.Configuration.LazyLoadedEnabled=false;
+		this.Configuration.ProxyCreationEnabled=false;
+	}
+	public DbContextBase(string connectionString,IAuditable auditLog):this(connectionString){
+		this.AuditLogger=auditLog;
+	}
+	public T Update<T>(T item)where T:ModelBase{
+		this.Set<T>().Attach(item);
+		this.Entry<T>().State=EntityState.Moidified;
+		this.SaveChanges();
+		return item;
+	}
+	public T Insert<T>(T item) where T:ModelBase{
+		this.Set<T>().Add(item);
+		this.SaveChanges();
+		return entity;
+	}
+	public T Delete<T>(T item)where T:ModelBase{
+		this.Entry<T>().State=EntityState.Deleted;
+		this.SaveChanges():
+	}
+	public T Find<T>(params object[] keys)where T:ModelBase{
+		return this.Set<T>().Find(keys);
+	}
+	public List<T> FindAll<T>(Expression<Func<T,bool>> conditions)where T:ModelBase{
+		if(conditions==null){
+			return this.Set<T>().ToList();
+		}else{
+			return this.Set<T>().Where(conditions).ToList();
+		}
+	}
+	public int SaveChanges(){
+		this.WriteLog();
+		return base.SaveChanges();
+	}
+	public void WriteLog(){
+		if(this.AuditLogger==null){
+			return ;
+		}
+		foreach(var dbEntry in this.ChangeTracker.Entries<ModelBase>().Where(p=>p.State=EntityState.Modified||p.State=EntityState.Added||p.State=EntityState.Deleted)){
+			var auditAttr=dbEntry.Entity.GetType().GetCustomAttribute(typeof(AuditableAttribute),false) as AuditableAttribute;
+			if(auditAttr==null){
+				continute;
+			}
+			var operaterName=WCFContext.Current.OperaterName;
+			Task.Factory.NewStart(()=>{
+				var tableAttr=dbEntry.Entity.GetType().GetCustomeAttribute(typeof(TableAttribute),false) as TableAttribute;
+				var table=tableAttr!=null?tableAttr.Name:dbEntry.Entity.GetType().Name;
+				var moduleName=dbEntry.Entity.GetType().Split(".").Skip(1).FirstOrDefault();
+				AuditLogger.Write(dbEntry.Entity.ID,operaterName,moduleName,tableName,dbEntry.State.ToString(),dbEntry.Entity);
+			});
+		}
+	}
+}
+public class User:ModelBase
+{
+	public User(){
+		Roles=new List<Role>();
+		this.IsActive=true;
+		this.RoleIds=new List<int>();
+	}
+	public string LoginName{get;set;}
+	public string Password{get;set;}
+	public string Mobile{get;set;}
+	public string Email{get;set;}
+	public bool IsActive{get;set;}
+	public virtual List<Role> Roles{get;set;}
+	[NotMapped]
+	public virtual List<int> RoleIds{get;set;}
+	[NotMapped]
+	public string NewPassword{get;set;}
+	
+	[NotMapped]
+	public List<EnumBusinessPermission> BusinessPermissionList{
+		get{
+			var permissions=new List<EnumBusinessPermission>();
+			foreach(var role in Roles){
+				permissions.Add(role.BusinessPermissionList);
+			}
+			return permission.Distinct().ToList();
+		}
+	}
+}
+
+public class User:ModelBase
+{
+	public User(){
+		
+	}
+	[Required(ErrorMessage="登录名不能为空")]
+	public string LoginName{get;set;}
+	
+	public string Password{get;set;}
+	[RegularExpression(@"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z][3,4]$",ErrorMessage="电子邮件地址无效")]
+	public string Email{get;set;}
+	[RegularExpression(@"^[1-9]{1}\d{10}$",ErroMessage="不是有效的手机号")]
+	public string Mobile{get;set;}
+	public bool IsActive{get;set;}
+
+	public List<Role> Roles{get;set;}
+
+	[NotMapped]
+	public List<int> RoleIds{get;set;}
+	[NotMapped]
+	public string NewPassword{get;set;}
+	[NotMapped]
+	public List<EnumBusinessPermission> BusinessPermissionList{
+		get{
+			var permissions=new List<EnumBusinessPermission>();
+			foreach(var role in Roles){
+				permissions.AddRange(role.BusinessPermssionList)
+			}
+				return permissions.Distinct().ToList();
+		}
+	}
+	
+	[Auditable]
+	[Table("Role")]
+	public class Role:ModelBase
+	{
+		[Required(ErrorMessage="角色名称不能为空")]
+		public string Name{get;ste;}
+		public string Info{get;set;}
+		public virtual List<User> Users{get;set;}
+		public string BusinessPermissonString{get;set;}
+		public List<EnumBusinessPermission> BusinessPermissionList{
+			get{
+				if(string.IsNullOrEmpty(BusinessPermissionString)){
+					return new List<EnumBusinessPermission>();
+				}else{
+					return BusinessPermissionString.Split(",".ToCharArray()).Select(p=>int.parse(p)).Cast<EnumBusiessPermission>().ToList();
+				}
+			}
+			set{
+				BusinessPermissioString=string.Join(",",value.Select(p=>(int)p));
+			}
+		}
+	}
+}
+
+<div class='alert'>
+	<button class="close" data-dismiss="alert"></button>
+	<strong>用户权限相关：</strong>
+	请编辑其所属角色的权限，用户的权限时期所有角色权限所拥有的权限总和 ！
+</div>
+
+public class UserController:ComController
+{
+
+}
+@model PagedList<User>
+@using(H)
+Table 怎么出来的
+<div class="row_fluid">
+	<div class="span4">
+		<a class="btn red" id="delete" href="javascript:;"><i class="icon-trash icon-white"></i>删除</a>
+		<a class="btn blue thickbox" title="添加新用户" href="@Url.Action("Create")?TB_iframe=true&height=350&height=500"><i class="icon-plus icon-white"></i>新增</a>
+	</div>
+	<div class="span8">
+		@using(Html.BeginForm(null,null,null,FormMethod.Get,new{id="search"})){
+			<div class="dataTables_filter">
+				<label>
+					<button type="submit" class="btn">搜索<i class="icon-search"></i></button>	
+				</label>
+				<label>
+					<span>电话：</span>
+					@Html.TextGroup("Mobile",null,new{@class="m-wrap small"})
+				</label>
+				<label>
+					<span>登录名：</span>
+					@Html.TextGroup("LoginName",null,new{@class="m-wrap small"})
+				</label>
+			</div>
+		}
+	</div>
+</div>
+<div class="alert">
+	<button class="close" data-dismiss="alert"></button>
+	<strong>用户权限相关</strong>
+	请编辑所属角色的权限，用户的权限是所有角色所拥有的权限总和
+</div>
+@using(Html.BeginForm("Deleted","User",FormMethod.Post,new{id="mainForm"})){
+	<table class="table table-striped table-hover">
+		<thead>
+			<tr>
+				<th style="width:6px;">
+					<input type='checkbox' id="checkall" class="group-checkable"/>
+				</th>
+				<th>登录名</th><th>邮箱</th><th>电话</th><th>角色</th><th>激活</th><th>操作</th>
+			</tr>
+		</thead>
+		<tbody>
+			@foreach(var m in model){
+				<tr>
+					<td>
+						<input type='checkbox' class='checkboxes' name='ids' value='@m.Id'/>
+					</td>	
+					<td>@m.LoginName</td>
+					<td>@m.Email<td><td>@m.Mobile</td>
+					<td>@string.Join(",",@m.Roles.Select(p=>p.Name))</td>
+					<td>
+						<span class="label lable-@(m.IsActive?"success":"inverse")">@m.IsActive</span>
+					</td>
+					<td>
+						<a class="btn mini purple thickbox" title="编辑用户资料" href="@Url.Action("Edit",new{id="@m.Id"})?TB_iframe=true&width=350&height=500">
+							<i class='icon-edit'>编辑</i>							
+						</a>	
+					</td>
+				</tr>
+			}
+		</tbody>
+	</table>
+}
+
+关于Delete 怎么写
+$("#delete").click(function(){
+	var message="你确定删除勾选的记录吗？";
+	if($(this).attr("message")){
+		message=$(this).attr("message")+","+message;
+
+	}
+	if(confirm(message)){
+		$("#mainForm").submit();
+	}
+});
+
+$("#checkall").click(function(){
+	var isChecked=this.checked;
+	$("input:checkbox[name='ids']").each(function(){
+		this.checked=ischecked;
+	});
+	$.uniform.update(':checkbox');
+});
+
+$.uniform.udpate(":checkbox");
+
+如何删除
+
+[HttpPost]
+public ActionResult Deleted(List<int> ids){
+	this.AccountService.DeleteUser(ids);
+	return RedirectToAction("Index");
+}
+
+public interface IUserService
+{
+	IEnumerable<Role> GetRoleList(RoleRequest request=null);
+
+	IEnumerable<User> GetUserList(UserRequest request=null);
+	void SaveUser(User user);
+	User GetUser(int id);
+	void DeleteUser(List<int> ids);
+}
+public class UserService:IUserService
+{
+	public void DeleteUser(List<int> ids){
+		using(var dbContext=new AccountDbContext()){
+			dbContext.Users.Include("Roles").Where(u=>ids.Contains(u.Id)).ForEach(u=>{
+				u.Roles.Clear();
+				dbContext.Users.Remove(u);
+			});
+			dbContext.SaveChanges();
+		}
+	}
+	public void SaveUser(User user){
+		using(var dbContext=new AccountDbContext()){
+			if(user.ID>0){
+				dbContext.Update<User>(user);
+				var roles=dbContext.Roles.Where(r=>user.RoleIds.Contains(r.Id));
+				user.Roles=roles;
+				dbContext.SaveChanges();
+			}else{
+				//添加
+				var existUser=dbContext.Users.Where(u=>u.LoginName==user.LoginName).SingleOrDefault();
+				if(existUser.Count>0){
+					throw new BusinessException("LoginName","此用户名已经注册！");
+				}
+				dbContext.Insert<User>(user);
+				dbContext.SaveChanges();
+			}
+		}
+		return RefreshParent();
+	}
+
+	public User GetUser(int id){
+		using(var dbContext=new AccountDbContext()){
+			return dbContext.Users.Include("Roles").Where(u=>u.Id=id).SingleOrDefault();
+		}
+	}
+
+	public IEnumerable<User> GetUserList(UserRequest request=null){
+		request=request==null?new UserRequest();
+		using(var dbContext=new AccountDbContext()){
+			var users=dbContext.Users.Include("Roles");
+			if(!string.IsNullOrEmpty(request.LoginName)){
+				users=users.Where(u=>u.LoginName.Contains(request.LoginName));
+			}
+			if(!string.IsNullOrEmpty(request.Mobile)){
+				users=users.Where(u=>u.Mobile.Contains(request.Mobile));
+			}
+			return users.OrderByDescending(u=>u.ID).ToPagedList(request.PageIndex,request.PageSize);
+		}
+	}
+
+	public IEnumerable<Role> GetRoleList(RoleRequest request=null){
+		request=request??new RoleRequest();
+		using(var dbContext=new AccountDbContext()){
+			var roles=dbContext.Roles;
+			if(!string.IsNullOrEmpty(request.RoleName)){
+				roles=roles.Where(u=>u.Name.Contains(request.RoleName));
+			}
+			return roles.OrderByDescending(u=>u.Id).ToPagedList();
+		}
+	}
+}
+<div class='row-fluid'>
+<div class="span4">
+<a id="delete" class="btn red " title="删除元素" href='javascript:;'><i class="icon-trash icon-white"></i>删除</a>
+
+<a class="btn blue thickbox" href='@Url.Action("Create")?TB_iframe=true&width=350&height=500'><i class='icon-plus icon-white'></i>新增</a>
+</div>
+<div class='span8'>
+	@using(Html.BeginForm(null,null,null,FormMethod.Get,new{id="search"})){
+		<div class='dataTables_filter'>
+			<label>
+				<button type='submit' class='btn'><i class='icon-search'></i>搜索</button>
+			</label>
+			<label>
+				<span>电话：</span>
+				@Html.TextBoxFor(m=>m.Mobile,new{@class='m-wrap small'})
+			</label>
+			<label>
+				<span>手机号:</span>
+				@Html.TextBoxFor(m=>m.LoginName,new{@class='m-wrap small'})
+			</label>
+		</div>
+	}
+</div>
+</div>
+<div class='alert'>
+	<button class='close' data-dismiss='alert'></button>
+	<strong>用户权限相关</strong>
+	请编辑其所属角色的权限，用户的权限是其所有权限所拥有的权限总和！
+</div>
+@using(Html.BeginForm("Delete","User",FormMethod.Post,new{id="mainForm"})){
+	<table class='table table-striped table-hover'>
+		<thead>
+			<tr>
+				<th>
+					<input type='checkbox' id='checkall'class='group-checkable'/>
+				</th>
+				<th>登录名</th><th>手机</th><th>邮箱</th><th>角色</th><th>是否激活</th><th>操作</th>
+			</tr>
+		</thead>
+		<tbody>
+			@foreach(var m in model){
+				<tr>
+					<td><input type='checkbox' class='checkboxes' name='ids' value='@m.Id'></td>	
+					<td>@m.LoginName</td><td>@m.Mobile</td><td>@m.Email</td>
+					<td>
+						@string.Join(",",m.Roles.Select(m=>m.Name))
+					</td>
+					<td>
+						<span class='label label-@(m.IsActive?"success":"inverse")'>@m.IsActive</span>
+					</td>
+					<td>
+						<a class='btn mini purple thickbox' href='@Url.Action("Edit",new{id=@m.Id})?TB_iframe=true&width=350&height=500'><i class='icon-edit'></i>编辑</a>
+					</td>
+				</tr>
+			}
+		</tbody>
+	</table>
+}
+<div class='dataTables_paginate paging-bootstrap pagination'>
+	@Html.Pager(Model,new PageOptions{ShowTotalItemCount=true})
+</div>
+
+public class UserController:ComController
+{
+	public ActionResult Index(UserRequest request){
+		var result=this.AccountService.GetUserList(request);
+		return View(result);
+	}
+	public ActionResult Create(){
+		var roles=this.AccountService.GetRoleList();
+		ViewBag.RoleIds=new SelectList(roles,"Id","Name");
+		var model=new User();
+		model.Password="111111";
+		return View("Edit",model);
+	}
+	[HttpPost]
+	public ActionResult Create(FormCollection collection){
+		var model=new User();
+		this.TryUpdateModel<User>(model);
+		try{
+			this.AccountService.SaveUser(user);
+		}catch(BusinessException e){
+			this.ModelState.AddModelError(e.Name,e.message);
+			var roles=this.AccountService.GetRoleList();
+			ViewBag.RoleIds=new SelectList(roles,"Id","Name");
+			return View("Edit",model);
+		}
+		return RefreshParent();
+	}
+	public ActionResult Edit(int id){
+		var roles=this.AccountService.GetRoleList();
+		ViewBag.RoleIds=new SelectList(roles,"Id","Name");
+		var model=this.AccountService.GetUser(id);
+		return View(model);
+	}
+	[HttpPost]
+	public ActionResult Edit(FormCollection collection){
+		var model=new User();
+		this.TryUpdateModel<User>(model);
+		this.AccountService.SaveUser(user);
+		return RefreshParent();
+	}
+	public ActionResult Delete(List<int> ids){
+		this.AccountService.DeleteUser(ids);
+		return RedirectToAction("Index");
+	}
+}
+public interface IUserService
+{
+	IEnumerable<User> GetUserList(UserRequest request=null);
+	IEnumerable<Role> GetRoleList(RoleRequest request=null);
+	User GetUser(int id);
+	void SaveUser(User user);
+	void DeleteUser(List<int> ids);
+}
+public class UserService:IUserService
+{
+	public IEnumerable<User>(UserRequest request=null){
+		request=request??new UserRequest();
+		using(var dbContext=new AccountDbContext()){
+			var users=dbContext.Users.Include("Roles");
+			if(!string.IsNullOrEmpty(request.LoginName)){
+				users=users.Where(u=>u.LoginName.Contains(request.LoginName));	
+			}
+			if(!string.IsNullOrEmpty(request.Mobile)){
+				users=users.Where(u=>u.Mobile.Contains(request.Mobile));
+			}
+			return users.OrderByDescending(u=>u.Id).ToPagedList<User>(request.PageIndex,request.PageSize);
+		}
+	}
+	public IEnumerable<Role> GetRoleList(RoleRequest reuqest=null){
+		request=request??new RoleRequest();
+		using(var dbCotnext=new AccountDbContext()){
+			var roles=dbContext.Roles;
+			if(!string.IsNullOrEmpty(request.RoleName)){
+				roles=roles.Where(r=>r.Name.Contains(request.RoleName));
+			}
+			return roles.OrderByDescending(r=>r.Id).ToPagedList(request.PageIndex,request.PageSize);
+		}
+	}
+	public User GetUser(int id){
+		using(var dbContext=new AccountDbContext()){
+			return dbContext.Users.Include("Roles").Where(u=>u.id=id).SingleOrDefault();
+		}
+	}
+	public void SaveUser(User user){
+		using(var dbContext=new AccountDbContext()){
+			if(user.Id>0){
+				dbContext.Update<User>(user);
+				var roles=dbContext.Roles.Where(r=>user.RoleIds.Contains(r.Id)).ToList();
+				user.Roles=roles;
+				dbContext.SaveChanges();
+			}else{
+				var existUsers=dbContext.FindAll<User>(u=>u.LoginName=user.LoginName);
+				if(existUsers.Count>0){
+					throw new BusinessException("LoginName","此用户名已经被注册了！");
+				}
+				dbContext.Insert<User>(user);
+				var roles=dbContext.Roles.Where(r=>user.RoleIds.Contains(r.Id)).ToList();
+				user.Roles=roles;
+				dbContext.SaveChanges();
+			}
+		}
+	}
+	public void DeleteUser(List<int> ids){
+		using(var dbContext=new AccountDbContext()){
+			dbContext.Users.Include("Roles").Where(r=>ids.Contains(r.Id)).ToList().ForEach(m=>{
+				m.Roles.Clear();
+				dbContext.Users.Remove(m);
+			});
+			db.SaveChanges();
+		}
+	}
+}
+public class AccountDbContext:DbContextBase
+{
+	public AccountDbContext():base(CachedConfigContext.Current.DaoConfig.Account,new LogDbContext()){
+		
+	}
+	public void OnModelCreating(DbMolderBuilder modelBuilder){
+		this.Database.SetInitlaizer<AccountDbContext>(null);
+		modelBuilder.Entry<User>().
+			HasMany(u=>u.Role)
+			.WithMany(r=>r.User)
+			.Map(m=>{
+			m.ToTable("UserRole");
+			m.MapLeftKey("UserID");
+			m.MapRightKey("RoleID");
+		});
+		base.OnModelCreating(modelBuilder);
+	}
+	public DbSet<User> Users{get;set;}
+	public DbSet<Role> Roles{get;set;}
+	public DbSet<VerifyCode> VerifyCodes{get;set;}
+	public DbSet<LoginInfo> LoginInfos{get;set;}
+}
+//ToPagedList
+//CachedConfig
+public class FrameController:Controller
+{
+	public ContentResult RefreshPreant(string alert=null){
+		var script=string.Format("<script>{0}parent.location.reload(1);</script>",string.IsNullOrEmpty(alert)?string.Empty:"alert('"+alert+"');");
+		return Content(script);
+	}
+}

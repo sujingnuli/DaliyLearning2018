@@ -465,3 +465,118 @@ public void Purge(LinkedList<int> Ha){
 //循环链表
 //c#中的线性表
 
+双向链表 Doubly Linked List .
+包含直接前驱结点  地址Prev
+包含 直接后继结点地址 Next 
+Prev ,Data,Next 
+//
+public class DbNode<T>
+{
+	private T data;
+	private DbNode<T> prev;
+	private DbNode<T> next;
+	public DbNode(T val,Node<T> prev,Node<T> next){
+		this.data=val;
+		this.prev=prev;
+		this.next=next;
+	}
+	public DbNode<T>(T val){
+		this.data=val;
+		this.prev=null;
+		this.next=null;
+	}
+	public DbNode<T>(){
+		this.data=default(T);
+		this.prev=null;
+		this.next=null;
+	}
+	public T Data{
+		get{
+			return this.data;
+		}
+		set{
+			this.data=value;
+		}
+	}
+	public DbNode<T> Prev{
+		get{
+			return this.prev;
+		}
+		set{
+			this.prev=value;
+		}
+	}
+	public DbNode<T> Next{
+		get{
+			return this.next;
+		}
+		set{
+			this.next=value;
+		}
+	}
+}
+//
+双向链表，有两个引用域。
+//循环链表
+有些应用，不需要链表中，有特别明显的头尾结点，这种情况下，可以方便的从最后一个结点，访问到第一个结点
+循环链表。判断 结点的引用域 是否为头引用。
+判断链表 结束的条件。
+	不是判断，引用域 是否为空。
+	判断，结点的引用域，是否为头引用
+c#的线性表
+IList接口，表示一个集合。
+public interface IListDS<T>:IList<T>
+{
+	void Append(T item);
+	void Insert(T item,int i);
+	void Delete(int i);
+	int Location(T item);
+	T GetItem(int i);
+	int GetLength();
+	bool isEmpty();
+	bool isFull();
+}
+
+IList<T> 接口，表示一个集合。
+
+可排序，
+可按索引访问。
+ILIst object 
+IList, ICollection .
+IList ,ICollection .
+IList 的实现分为三类
+	只读	
+	大小不变
+	大小可变
+只读IList 不能修改。
+大小不变，不能插入删除，可以修改。
+大小可变，可增删改项
+
+非泛型IList 接口
+interface IList:ICollection,IEnumerable
+{
+	bool isFixedSize{get;}
+	bool isReadOnly{get;}
+	object this[T index]{get;set;}
+	int Add(object value);
+	void Clear();
+	int IndexOf(object value);
+	bool Contains(object value);
+	void Insert(int idnex,object value);
+	void Remove(object value);
+	void RemoveAt(int index);
+}
+.Net 中的一些 集合类，实现了 IList 接口，
+ArrayList .
+ListDictinary .
+StringCollection
+StringDictionary .
+ArrayList .
+
+线性表，顺序表，链式表。
+ArrayList .是顺序表。
+ArrayList 是顺序表
+ArrayList 容量可动态增长。
+
+List<T> 是 ArrayList在泛型中的替代品。
+

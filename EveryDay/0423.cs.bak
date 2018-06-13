@@ -1,0 +1,9 @@
+1.调用这个方法的时候，没有实现。
+看看哪里，没有实现，打断电，调试。
+2.Index的页面怎么写
+
+<div class='row-fluid'>
+	<div class='span4'>
+		<a class='btn red' id='delete' href='javascript:;'
+	</div>
+</div>
